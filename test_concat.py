@@ -52,7 +52,7 @@ class test_concat_csv(unittest.TestCase):
                      "msd_NT_slice_2_thalamus_vid_2.csv",
                      "msd_NT_slice_2_thalamus_vid_3.csv"]
     filenames_without_path = []
-    start_index = len(concat_csvs.FOLDER_NAME) + 1
+    start_index = len(self.complete_csv.get_folder_name()) + 1
     for f in self.complete_csv.files:
       filenames_without_path.append(f[start_index:])
     self.assertListEqual(filenames_without_path, correct_files,
