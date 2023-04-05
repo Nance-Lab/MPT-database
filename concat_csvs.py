@@ -7,8 +7,14 @@ import os
 import csv
 
 class concat_csvs:
+  '''
+  Prompts user for CSV files (.csv) with results from multiple particle
+  tracking (MPT) experiments, appends them them all together (by file name,
+  alphabetically ascending), and then saves the combined CSV in the current
+  directory.
+  '''
 
-  PARTICLE_ID_STEP = 651
+  PARTICLE_ID_STEP = 651 # timesteps per particle
 
   def __init__(self):
     folder_name_request = "Enter the name of the " \
@@ -23,6 +29,7 @@ class concat_csvs:
     timestep_id_count = 0
     particle_id_count = 0
     df_list = []  # append all DataFrames into one list
+
     for f in self.files:
       curr_csv = pd.read_csv(f, index_col=[0])
       curr_csv["file_name"] = f
@@ -30,27 +37,55 @@ class concat_csvs:
       df_list.append(curr_csv)
       timestep_id_count = timestep_id_count + len(curr_csv)
       particle_id_count = particle_id_count + self.PARTICLE_ID_STEP
+
     df = pd.concat(df_list, ignore_index=True)
     df["timestep_id"] = np.arange(timestep_id_count)
     self.full_csv = df
 
   def __len__(self):
+    '''Returns the length of the combined CSV.'''
     return len(self.full_csv)
 
   def __eq__(self, other):
+    '''
+    Returns true if two CSVs are equal, false otherwise.
+
+    Parameters:
+    ----------
+    other: pandas DataFrame
+        Another DataFrame to compare this CSV as a DataFrame to
+    '''
     return pd.DataFrame.equals(self.full_csv, other.full_csv)
 
   def get_columns(self):
+    '''Returns all the columns (as a list) of the combined CSV.'''
     return list(self.full_csv.columns.values)
 
   def get_folder_name(self):
+    '''Returns the name of the folder that contains the individual CSV files.'''
     return self.folder_name
 
   def get_csv(self, full_csv_name):
+    '''
+    Returns the combined CSV in .csv form using a given name.
+
+    Parameters:
+    ----------
+    full_csv_name: str
+        The desired name of the complete (fully concatenated) CSV
+    '''
     return self.full_csv.to_csv(os.path.join("./", full_csv_name), \
                                 na_rep="None")
 
 def validate_input(name, prompt):
+  '''
+  Continues to prompt the user for a name (of a file/directory) until a valid
+  name has been given.
+
+  Returns:
+  ----------
+  A valid name the user has entered.
+  '''
   regex = r"^([a-zA-Z0-9][^*/><?\|:]*)$"
   valid_name = bool(re.search(regex, name))
   while not valid_name:
