@@ -5,6 +5,8 @@ from natsort import natsorted
 import re
 import os
 import csv
+import dask.dataframe as dd
+import dask.array as da
 
 class concat_csvs:
   '''
@@ -23,6 +25,7 @@ class concat_csvs:
     # check to see if name entered is valid
     self.folder_name = validate_input(self.folder_name, folder_name_request)
 
+    print("Concatenanting the CSVs:")
     self.files = gb.glob(self.folder_name + "/*.csv")
     self.files = natsorted(self.files)
 
@@ -31,15 +34,16 @@ class concat_csvs:
     df_list = []  # append all DataFrames into one list
 
     for f in self.files:
-      curr_csv = pd.read_csv(f, index_col=[0])
+      print(f"\t{f}")
+      curr_csv = dd.read_csv(f, blocksize="100MB")
       curr_csv["file_name"] = f
       curr_csv["particle_id"] = particle_id_count
       df_list.append(curr_csv)
       timestep_id_count = timestep_id_count + len(curr_csv)
       particle_id_count = particle_id_count + self.PARTICLE_ID_STEP
 
-    df = pd.concat(df_list, ignore_index=True)
-    df["timestep_id"] = np.arange(timestep_id_count)
+    df = dd.concat(df_list, ignore_index=True)
+    df["timestep_id"] = da.from_array(np.arange(timestep_id_count))
     self.full_csv = df
 
   def __len__(self):
