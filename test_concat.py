@@ -52,7 +52,7 @@ class test_concat_csv(unittest.TestCase):
                      "msd_NT_slice_2_thalamus_vid_2.csv",
                      "msd_NT_slice_2_thalamus_vid_3.csv"]
     filenames_without_path = []
-    start_index = len(concat_csvs.FOLDER_NAME) + 1
+    start_index = len(self.complete_csv.get_data_folder()) + 1
     for f in self.complete_csv.files:
       filenames_without_path.append(f[start_index:])
     self.assertListEqual(filenames_without_path, correct_files,
@@ -67,7 +67,11 @@ class test_concat_csv(unittest.TestCase):
 
   def test_consistent_dfs(self):
     other_csv = concat_csvs()
+    # TODO: 
+    # sum the lengths of the csv
+    # summation of shapes
     self.assertEqual(self.complete_csv, other_csv, "Data order is inconsistent")
+    
 
 if __name__ == "__main__":
   unittest.main()
